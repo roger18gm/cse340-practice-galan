@@ -6,6 +6,9 @@ import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const NODE_ENV = process.env.NODE_ENV || 'production';
+const PORT = process.env.PORT || 3000;
+
 // Create an instance of an Express application
 const app = express();
 
@@ -19,13 +22,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'src/views'));
 
 app.get("/", (req, res) => {
-    const title = "Home page!";
+    const title = "Home";
     const content = '<h1>My first Node.js, Express, and EJS web application!</h1><p>Claude helped with the styling of this website</p>';
-    res.render("index", { title, content })
+    res.render("index", { title, content, NODE_ENV, PORT })
 })
 
 app.get("/about", (req, res) => {
-    const title = "about me!!";
+    const title = "About Me";
     const content = `<h1>About Me</h1>
     <p>Thank you for visiting.</p>
     
@@ -54,11 +57,11 @@ app.get("/about", (req, res) => {
             BYU-Idaho, 2023-2026</p>
         </div>
     </div>`;
-    res.render("index", { title, content, skills: ["JavaScript", "Node.js", "Express", "EJS", "React", "MongoDB", "CSS", "HTML5"] })
+    res.render("index", { title, content, skills: ["JavaScript", "Node.js", "Express", "EJS", "React", "MongoDB", "CSS", "HTML5"], NODE_ENV, PORT })
 })
 
 app.get("/contact", (req, res) => {
-    const title = "contact me!!";
+    const title = "Contact Me";
     const content = `<h1>Contact me</h1>
     <p>lets chat!</p>
     
@@ -93,11 +96,28 @@ app.get("/contact", (req, res) => {
             </div>
         </div>
     </div>`;
-    res.render("index", { title, content, })
+    res.render("index", { title, content, NODE_ENV, PORT })
 })
 
-const NODE_ENV = process.env.NODE_ENV || 'production';
-const PORT = process.env.PORT || 3000;
+// When in development mode, start a WebSocket server for live reloading
+if (NODE_ENV.includes('dev')) {
+    const ws = await import('ws');
+
+    try {
+        const wsPort = parseInt(PORT) + 1;
+        const wsServer = new ws.WebSocketServer({ port: wsPort });
+
+        wsServer.on('listening', () => {
+            console.log(`WebSocket server is running on port ${wsPort}`);
+        });
+
+        wsServer.on('error', (error) => {
+            console.error('WebSocket server error:', error);
+        });
+    } catch (error) {
+        console.error('Failed to start WebSocket server:', error);
+    }
+}
 
 // Start the server and listen on the specified port
 app.listen(PORT, () => {
