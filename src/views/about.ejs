@@ -1,0 +1,46 @@
+<%- include('partials/header') %>
+<main>
+  <h1>About Me</h1>
+  <p>Thank you for visiting.</p>
+
+  <div class="about-content">
+    <div class="profile-section">
+      <div class="profile-image">
+        <img
+          src="/images/roger.galan.headshot.jpg"
+          alt="My Profile Picture"
+          class="profile-pic"
+        />
+      </div>
+      <div class="profile-info">
+        <h2>Hi, I'm Roger!</h2>
+        <p>
+          I'm a full-stack web developer passionate about creating clean,
+          efficient, and user-friendly applications. I specialize in JavaScript,
+          Node.js, and modern front-end frameworks.
+        </p>
+        <p>
+          When I'm not coding, you can find me playing pickleball, playing
+          Skyrim, or eating BBQ wings.
+        </p>
+      </div>
+    </div>
+
+    <h2>My Skills</h2>
+    <ul class="skills-list">
+      <% skills.forEach((skill) => { %>
+      <li><%= skill %></li>
+      <% }); %>
+    </ul>
+
+    <h2>Education</h2>
+    <div class="education">
+      <p>
+        <strong>Bachelor of Science in Software Engineering</strong><br />
+        BYU-Idaho, 2023-2026
+      </p>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

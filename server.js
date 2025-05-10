@@ -21,83 +21,93 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Set the views directory (where your templates are located) after static files are handled
 app.set('views', path.join(__dirname, 'src/views'));
 
+// Middleware to add current year to res.locals
+app.use((req, res, next) => {
+    // Get the current year for copyright notice
+    res.locals.currentYear = new Date().getFullYear();
+    next();
+});
+
 app.get("/", (req, res) => {
     const title = "Home";
-    const content = '<h1>My first Node.js, Express, and EJS web application!</h1><p>Claude helped with the styling of this website</p>';
-    res.render("index", { title, content, NODE_ENV, PORT })
+    res.render("index", { title, NODE_ENV, PORT });
 })
 
 app.get("/about", (req, res) => {
     const title = "About Me";
-    const content = `<h1>About Me</h1>
-    <p>Thank you for visiting.</p>
-    
-    <div class="about-content">
-        <div class="profile-section">
-            <div class="profile-image">
-                <img src="/images/roger.galan.headshot.jpg" alt="My Profile Picture" class="profile-pic">
-            </div>
-            <div class="profile-info">
-                <h2>Hi, I'm Roger!</h2>
-                <p>I'm a full-stack web developer passionate about creating clean, efficient, and user-friendly applications. I specialize in JavaScript, Node.js, and modern front-end frameworks.</p>
-                <p>When I'm not coding, you can find me playing pickleball, playing Skyrim, or eating BBQ wings.</p>
-            </div>
-        </div>
-        
-        <h2>My Skills</h2>
-        <ul class="skills-list">
-            <% skills.forEach((skill) => { %>
-                <li><%= skill %></li>
-            <% }); %>
-        </ul>
-        
-        <h2>Education</h2>
-        <div class="education">
-            <p><strong>Bachelor of Science in Software Engineering</strong><br>
-            BYU-Idaho, 2023-2026</p>
-        </div>
-    </div>`;
-    res.render("index", { title, content, skills: ["JavaScript", "Node.js", "Express", "EJS", "React", "MongoDB", "CSS", "HTML5"], NODE_ENV, PORT })
+    const skills = ["JavaScript", "Node.js", "Express", "EJS", "React", "MongoDB", "CSS", "HTML5"];
+    res.render("about", { title, skills, NODE_ENV, PORT });
 })
 
 app.get("/contact", (req, res) => {
     const title = "Contact Me";
-    const content = `<h1>Contact me</h1>
-    <p>lets chat!</p>
-    
-    <div class="contact-form">
-        <form action="/submit" method="POST">
-            <div class="form-group">
-                <input type="text" name="name" placeholder="Name" required>
-            </div>
-            
-            <div class="form-group">
-                <input type="email" name="email" placeholder="Email" required>
-            </div>
-            
-            <div class="form-group">
-                <textarea name="message" placeholder="Message" rows="5" required></textarea>
-            </div>
-            
-            <div class="form-group">
-                <input type="submit" value="Submit" class="submit-btn">
-            </div>
-        </form>
-        
-        <div class="contact-info">
-            <h2>Other Ways to Reach Me</h2>
-            <p><strong>Email:</strong> roger18gm@gmail.com</p>
-            <p><strong>Phone:</strong> (555) 123-4567</p>
-            <p><strong>Location:</strong> Rexburg, ID</p>
-            
-            <div class="social-links">
-                <a href="https://github.com/roger18gm" class="social-link">GitHub</a>
-                <a href="https://www.linkedin.com/in/roger-galan-manzano/" class="social-link">LinkedIn</a>
-            </div>
-        </div>
-    </div>`;
-    res.render("index", { title, content, NODE_ENV, PORT })
+    res.render("contact", { title, NODE_ENV, PORT });
 })
+
+// Basic route with parameters
+app.get('/explore/:category/:id', (req, res) => {
+    // Log the params object to the console
+    console.log('Route Parameters:', req.params);
+    console.log('Query Parameters:', req.query);
+
+    // Destructure the parameters
+    const { category, id } = req.params;
+
+    // Get query parameters (optional)
+    const { sort = 'default', filter = 'none' } = req.query;
+
+    const title = `Explore ${category}`;
+
+    // Send a response using the parameters
+    res.render(`explore`, { category, id, sort, filter, title, NODE_ENV });
+});
+
+
+
+// // Test route that deliberately throws an error
+// app.get('/test-error', (req, res, next) => {
+//     try {
+//         // Intentionally trigger an error
+//         const nonExistentVariable = undefinedVariable;
+//         res.send('This will never be reached');
+//     } catch (err) {
+//         // Forward the error to the global error handler
+//         next(err);
+//     }
+// });
+
+// // Test route that explicitly creates and forwards an error
+// app.get('/manual-error', (req, res, next) => {
+//     const err = new Error('This is a manually triggered error');
+//     err.status = 500;
+//     next(err); // Forward to the global error handler
+// });
+
+/**
+ * Error Handling Middleware
+ */
+
+// Catch-all middleware for unmatched routes (404)
+app.use((req, res, next) => {
+    const err = new Error('Page Not Found');
+    err.status = 404;
+    next(err); // Forward to the global error handler
+});
+
+// Global error handler middleware
+app.use((err, req, res, next) => {
+    // Log the error for debugging
+    console.error(err.stack);
+
+    // Set default status and determine error type
+    const status = err.status || 500;
+    const title = status === 404 ? 'Page Not Found' : 'Internal Server Error';
+    const error = err.message;
+    const stack = err.stack;
+
+    // Render the appropriate template based on status code
+    res.status(status).render(`errors/${status === 404 ? '404' : '500'}`, { title, error, stack, NODE_ENV });
+});
 
 // When in development mode, start a WebSocket server for live reloading
 if (NODE_ENV.includes('dev')) {
