@@ -28,6 +28,10 @@ app.set('views', path.join(__dirname, 'src/views'));
 app.use((req, res, next) => {
     // Get the current year for copyright notice
     res.locals.currentYear = new Date().getFullYear();
+
+    // Add NODE_ENV for all views
+    res.locals.NODE_ENV = process.env.NODE_ENV || 'development';
+
     next();
 });
 
@@ -86,37 +90,7 @@ app.use((req, res, next) => {
     // Don't forget to call next() to continue to the next middleware
     next();
 });
-// Sample product data
-const products = [
-    {
-        id: 1,
-        name: "Kindle E-Reader",
-        description: "Lightweight e-reader with a glare-free display and weeks of battery life.",
-        price: 149.99,
-        image: "https://picsum.photos/id/367/800/600"
-    },
-    {
-        id: 2,
-        name: "Vintage Film Camera",
-        description: "Capture timeless moments with this classic vintage film camera, perfect for photography enthusiasts.",
-        price: 199.99,
-        image: "https://picsum.photos/id/250/800/600"
-    },
-    {
-        id: 3,
-        name: "NOt a kindle",
-        description: "Fake kindle",
-        price: 49.99,
-        image: "https://picsum.photos/id/367/800/600"
-    },
-    {
-        id: 4,
-        name: "Fake vintage cam",
-        description: "Knockoff vintage cam. Just a picture of a camera.",
-        price: 9.99,
-        image: "https://picsum.photos/id/250/800/600"
-    },
-];
+
 
 // Middleware to validate display parameter
 const validateDisplayMode = (req, res, next) => {
@@ -133,18 +107,18 @@ const validateDisplayMode = (req, res, next) => {
  */
 app.get("/", (req, res) => {
     const title = "Home";
-    res.render("index", { title, NODE_ENV, PORT });
+    res.render("index", { title });
 })
 
 app.get("/about", (req, res) => {
     const title = "About Me";
     const skills = ["JavaScript", "Node.js", "Express", "EJS", "React", "MongoDB", "CSS", "HTML5"];
-    res.render("about", { title, skills, NODE_ENV, PORT });
+    res.render("about", { title, skills });
 })
 
 app.get("/contact", (req, res) => {
     const title = "Contact Me";
-    res.render("contact", { title, NODE_ENV, PORT });
+    res.render("contact", { title });
 })
 
 // Basic route with parameters
@@ -162,14 +136,46 @@ app.get('/explore/:category/:id', (req, res) => {
     const title = `Explore ${category}`;
 
     // Send a response using the parameters
-    res.render(`explore`, { category, id, sort, filter, title, NODE_ENV });
+    res.render(`explore`, { category, id, sort, filter, title });
 });
 
 // Products page route with display mode validation
 app.get('/products/:display', validateDisplayMode, (req, res) => {
     const title = "Our Products";
     const { display } = req.params;
-    res.render('products', { title, products, display, NODE_ENV });
+
+    // Sample product data
+    const products = [
+        {
+            id: 1,
+            name: "Kindle E-Reader",
+            description: "Lightweight e-reader with a glare-free display and weeks of battery life.",
+            price: 149.99,
+            image: "https://picsum.photos/id/367/800/600"
+        },
+        {
+            id: 2,
+            name: "Vintage Film Camera",
+            description: "Capture timeless moments with this classic vintage film camera, perfect for photography enthusiasts.",
+            price: 199.99,
+            image: "https://picsum.photos/id/250/800/600"
+        },
+        {
+            id: 3,
+            name: "NOt a kindle",
+            description: "Fake kindle",
+            price: 49.99,
+            image: "https://picsum.photos/id/367/800/600"
+        },
+        {
+            id: 4,
+            name: "Fake vintage cam",
+            description: "Knockoff vintage cam. Just a picture of a camera.",
+            price: 9.99,
+            image: "https://picsum.photos/id/250/800/600"
+        },
+    ];
+    res.render('products', { title, products, display });
 });
 
 // Default products route (redirects to grid view)
@@ -219,7 +225,7 @@ app.use((err, req, res, next) => {
     const stack = err.stack;
 
     // Render the appropriate template based on status code
-    res.status(status).render(`errors/${status === 404 ? '404' : '500'}`, { title, error, stack, NODE_ENV });
+    res.status(status).render(`errors/${status === 404 ? '404' : '500'}`, { title, error, stack });
 });
 
 // When in development mode, start a WebSocket server for live reloading
