@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import { addGlobalData } from './src/middleware/index.js';
 import indexRoutes from './src/routes/index.js';
-import exploreRoutes from './src/routes/explore/index.js';
+import productsRoutes from './src/routes/products/index.js';
 
 // Create __dirname and __filename variables
 const __filename = fileURLToPath(import.meta.url);
@@ -33,7 +33,7 @@ app.use(addGlobalData);
  * Routes
  */
 app.use("/", indexRoutes);
-app.use("/explore", exploreRoutes);
+app.use("/products", productsRoutes);
 
 // Catch-all middleware for unmatched routes (404)
 app.use((req, res, next) => {
