@@ -27,7 +27,6 @@ app.set('views', path.join(__dirname, 'src/views'));
  */
 app.use(addGlobalData);
 // Add this after your other middleware (static files, etc.)
-app.use(addNavigationData);
 
 /**
  * Routes
@@ -77,20 +76,7 @@ if (NODE_ENV.includes('dev')) {
     }
 }
 
-// Test database connection and setup tables
-testConnection()
-    .then(() => setupDatabase())
-    .then(() => {
-        // Start your WebSocket server if you have one
-        // startWebSocketServer();
-
-        // Start the Express server
-        app.listen(PORT, () => {
-            console.log(`Server running on http://127.0.0.1:${PORT}`);
-            console.log('Database connected and ready');
-        });
-    })
-    .catch((error) => {
-        console.error('Failed to start server:', error.message);
-        process.exit(1);
-    });
+// Start the Express server
+app.listen(PORT, () => {
+    console.log(`Server running on http://127.0.0.1:${PORT}`);
+});
