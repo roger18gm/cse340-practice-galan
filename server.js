@@ -4,8 +4,6 @@ import path from 'path';
 import { addGlobalData } from './src/middleware/index.js';
 import indexRoutes from './src/routes/index.js';
 import productsRoutes from './src/routes/products/index.js';
-import { setupDatabase, testConnection } from './src/models/setup.js';
-import { addNavigationData } from './src/middleware/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,12 +34,6 @@ app.use(addNavigationData);
  */
 app.use("/", indexRoutes);
 app.use("/products", productsRoutes);
-
-app.get('/manual-error', (req, res, next) => {
-    const err = new Error('This is a manually triggered error');
-    err.status = 500;
-    next(err); // Forward to the global error handler
-});
 
 // Catch-all middleware for unmatched routes (404)
 app.use((req, res, next) => {
