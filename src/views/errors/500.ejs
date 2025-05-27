@@ -5,9 +5,12 @@
     Something went wrong on our server. Our team has been notified and is
     working to fix the issue.
   </p>
+  <% if (NODE_ENV.includes('dev')) { %>
+
   <p>Error details (for development only):</p>
   <pre><%= error %></pre>
   <p>Stack trace:</p>
   <pre><%= stack %></pre>
+  <% } %>
 </main>
 <%- include('../partials/footer') %>
