@@ -17,4 +17,6 @@ router.get("/contact", (req, res) => {
     res.render("contact", { title });
 })
 
+
+
 export default router;
