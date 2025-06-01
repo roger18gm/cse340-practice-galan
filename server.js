@@ -76,7 +76,13 @@ if (NODE_ENV.includes('dev')) {
     }
 }
 
-// Start the Express server
-app.listen(PORT, () => {
-    console.log(`Server running on http://127.0.0.1:${PORT}`);
+app.listen(PORT, async () => {
+    try {
+        await testConnection();
+        await setupDatabase();
+    } catch (error) {
+        console.error('Database setup failed:', error);
+        process.exit(1);
+    }
+    console.log(`Server is running on http://127.0.0.1:${PORT}`);
 });

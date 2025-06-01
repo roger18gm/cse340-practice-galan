@@ -9,10 +9,15 @@ const router = Router();
  * organized and makes it easier to maintain and expand.
  */
 
-// Route for /explore - redirects to a random product
-router.get('/', async (req, res) => {
-    const randomProduct = await getRandomProduct();
-    res.redirect(`/products/${randomProduct.category}/${randomProduct.id}`);
+router.get('/', async (req, res, next) => {
+    const randomCategory = await getRandomNavigationCategory();
+    if (!randomCategory) {
+        const error = new Error('No categories available');
+        error.status = 404;
+        return next(error);
+    }
+
+    res.redirect(`/products/${randomCategory.slug}`);
 });
 
 // Route with multiple parameters
