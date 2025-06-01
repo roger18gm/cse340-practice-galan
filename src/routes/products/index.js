@@ -22,7 +22,7 @@ router.get('/', async (req, res, next) => {
         return next(error);
     }
 
-    res.redirect(`products/${randomCategory.slug}`);
+    res.redirect(`/products/${randomCategory.slug}`);
 });
 
 /**
@@ -48,7 +48,7 @@ router.get('/:category', async (req, res, next) => {
     const products = await getProductsByCategory(categoryData.id);
 
     // Render the products template
-    res.render('products/products.ejs', {
+    res.render('products', {
         title: `Exploring ${categoryData.name}`,
         display,
         categoryData,
