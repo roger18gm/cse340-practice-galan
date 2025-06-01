@@ -4,6 +4,8 @@ import path from 'path';
 import { addGlobalData } from './src/middleware/index.js';
 import indexRoutes from './src/routes/index.js';
 import productsRoutes from './src/routes/products/index.js';
+import { setupDatabase, testConnection } from './src/models/setup.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

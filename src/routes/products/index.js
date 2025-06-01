@@ -1,16 +1,21 @@
 import { Router } from 'express';
-import { getCategory, getCategoryItems, getItem, getRandomProduct } from '../../models/products-data.js';
+import {
+    getNavigationCategories,
+    getCategoryBySlug,
+    getChildCategories,
+    getProductsByCategory,
+    getRandomNavigationCategory
+} from '../../models/categories/index.js';
 
 const router = Router();
 
 /**
- * The explore functionality is more complex, involving data fetching and
- * dynamic content, so it gets its own directory. This keeps the code
- * organized and makes it easier to maintain and expand.
+ * Route for /products - redirects to a random navigation category
+ * Now uses database to select a random parent category instead of hardcoded data
  */
-
 router.get('/', async (req, res, next) => {
     const randomCategory = await getRandomNavigationCategory();
+
     if (!randomCategory) {
         const error = new Error('No categories available');
         error.status = 404;
@@ -20,41 +25,38 @@ router.get('/', async (req, res, next) => {
     res.redirect(`/products/${randomCategory.slug}`);
 });
 
-// Route with multiple parameters
-router.get('/:category', async (req, res) => {
-    const { category, id } = req.params;
+/**
+ * Route for viewing a category and its products/subcategories
+ * Updated to use database queries instead of static data
+ */
+router.get('/:category', async (req, res, next) => {
+    const { category } = req.params;
     const { display = 'grid' } = req.query;
 
-    // Use await to get data from the model
-    const categoryData = await getCategory(category);
+    // Get category from database
+    const categoryData = await getCategoryBySlug(category);
 
-    // Check if data exists
+    // Check if category exists
     if (!categoryData) {
-        return res.status(404).render('errors/404', {
-            title: 'Category Not Found'
-        });
+        const error = new Error('Category Not Found');
+        error.status = 404;
+        return next(error);
     }
 
-    const items = await getCategoryItems(category);
+    // Get subcategories and products for this category
+    const subcategories = await getChildCategories(categoryData.id);
+    const products = await getProductsByCategory(categoryData.id);
 
+    // Render the products template
     res.render('products', {
         title: `Exploring ${categoryData.name}`,
         display,
-        items: items,
-        categoryId: category,
-        categoryName: categoryData.name,
-        categoryDescription: categoryData.description
+        categoryData,
+        subcategories,
+        products,
+        hasProducts: products.length > 0,
+        hasSubcategories: subcategories.length > 0
     });
-});
-
-// Redirect item routes to category page
-router.get('/:category/:id', async (req, res) => {
-    const { category, id } = req.params;
-
-    const product = await getItem(category, id);
-
-    res.render('product', { title: `${product.name}`, product });
-
 });
 
 export default router;
