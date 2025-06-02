@@ -4,6 +4,7 @@ import path from 'path';
 import { addGlobalData } from './src/middleware/index.js';
 import indexRoutes from './src/routes/index.js';
 import productsRoutes from './src/routes/products/index.js';
+import dashboardRoutes from './src/routes/dashboard/index.js';
 import { setupDatabase, testConnection } from './src/models/setup.js';
 
 
@@ -27,6 +28,11 @@ app.set('views', path.join(__dirname, 'src/views'));
 /**
  * Middleware
  */
+// Middleware to parse JSON data in request body
+app.use(express.json());
+
+// Middleware to parse URL-encoded form data (like from a standard HTML form)
+app.use(express.urlencoded({ extended: true }));
 app.use(addGlobalData);
 // Add this after your other middleware (static files, etc.)
 
@@ -35,6 +41,7 @@ app.use(addGlobalData);
  */
 app.use("/", indexRoutes);
 app.use("/products", productsRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 // Catch-all middleware for unmatched routes (404)
 app.use((req, res, next) => {
