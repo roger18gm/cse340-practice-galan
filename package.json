@@ -14,8 +14,10 @@
   "license": "ISC",
   "packageManager": "pnpm@10.9.0",
   "dependencies": {
+    "connect-pg-simple": "^10.0.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "express-session": "^1.18.1",
     "pg": "^8.16.0"
   },
   "devDependencies": {

@@ -1,4 +1,6 @@
 import express from 'express';
+import session from 'express-session';
+import pgSession from 'connect-pg-simple';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { addGlobalData } from './src/middleware/index.js';
@@ -6,6 +8,8 @@ import indexRoutes from './src/routes/index.js';
 import productsRoutes from './src/routes/products/index.js';
 import dashboardRoutes from './src/routes/dashboard/index.js';
 import { setupDatabase, testConnection } from './src/models/setup.js';
+import db from './src/models/db.js';
+import accountRoutes from './src/routes/accounts/index.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -35,6 +39,26 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(addGlobalData);
 // Add this after your other middleware (static files, etc.)
+// Configure PostgreSQL session store
+const PostgresStore = pgSession(session);
+
+// Configure session middleware
+app.use(session({
+    store: new PostgresStore({
+        pool: db, // Use your PostgreSQL connection
+        tableName: 'sessions', // Table name for storing sessions
+        createTableIfMissing: true // Creates table if it does not exist
+    }),
+    secret: process.env.SESSION_SECRET || "default-secret-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    name: "sessionId",
+    cookie: {
+        secure: false, // Set to true in production with HTTPS
+        httpOnly: true, // Prevents client-side access to the cookie
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+    }
+}));
 
 /**
  * Routes
@@ -42,6 +66,7 @@ app.use(addGlobalData);
 app.use("/", indexRoutes);
 app.use("/products", productsRoutes);
 app.use('/dashboard', dashboardRoutes);
+app.use('/accounts', accountRoutes);
 
 // Catch-all middleware for unmatched routes (404)
 app.use((req, res, next) => {
