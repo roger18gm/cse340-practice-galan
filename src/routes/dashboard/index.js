@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
     // Add this check at the beginning of each dashboard route
     if (!req.session.isLoggedIn) {
-        res.locals.errors.push('Please log in to access the dashboard');
+        req.flash('error', 'Please log in to access the dashboard');
         return res.render('accounts/login', {
             title: 'Login'
         });
@@ -31,14 +31,13 @@ router.get('/', async (req, res, next) => {
 router.get('/add-product', (req, res) => {
     // Add this check at the beginning of each dashboard route
     if (!req.session.isLoggedIn) {
-        res.locals.errors.push('Please log in to access the dashboard');
+        req.flash('error', 'Please log in to access the dashboard');
         return res.render('accounts/login', {
             title: 'Login'
         });
     }
     res.render('dashboard/add-product', {
         title: 'Add Product',
-        errors: null,
         formData: {}
     });
 });
@@ -49,7 +48,7 @@ router.get('/add-product', (req, res) => {
 router.post('/add-product', async (req, res, next) => {
     // Add this check at the beginning of each dashboard route
     if (!req.session.isLoggedIn) {
-        res.locals.errors.push('Please log in to access the dashboard');
+        req.flash('error', 'Please log in to access the dashboard');
         return res.render('accounts/login', {
             title: 'Login'
         });
@@ -59,29 +58,27 @@ router.post('/add-product', async (req, res, next) => {
         const { name, description, price, image } = req.body;
 
         // Basic server-side validation
-        const errors = [];
 
         if (!name || name.trim().length === 0) {
-            errors.push('Product name is required');
+            req.flash('error', 'Product name is required');
         }
 
         if (!description || description.trim().length === 0) {
-            errors.push('Product description is required');
+            req.flash('error', 'Product description is required');
         }
 
         if (!price || isNaN(parseFloat(price)) || parseFloat(price) <= 0) {
-            errors.push('Valid product price is required');
+            req.flash('error', 'Valid product price is required');
         }
 
         if (!image || image.trim().length === 0) {
-            errors.push('Product image URL is required');
+            req.flash('error', 'Product image URL is required');
         }
 
         // If validation errors exist, redisplay the form
-        if (errors.length > 0) {
+        if (req.flash.length > 0) {
             return res.render('dashboard/add-product', {
                 title: 'Add Product',
-                errors: errors,
                 formData: req.body
             });
         }
@@ -102,11 +99,10 @@ router.post('/add-product', async (req, res, next) => {
 
     } catch (error) {
         console.error('Error processing add product form:', error);
-
+        req.flash('error', 'An error occurred while adding the product. Please try again.')
         // Redisplay form with error message
         res.render('dashboard/add-product', {
             title: 'Add Product',
-            errors: ['An error occurred while adding the product. Please try again.'],
             formData: req.body
         });
     }
@@ -118,7 +114,7 @@ router.post('/add-product', async (req, res, next) => {
 router.get('/edit-product', (req, res) => {
     // Add this check at the beginning of each dashboard route
     if (!req.session.isLoggedIn) {
-        res.locals.errors.push('Please log in to access the dashboard');
+        res.flash('error', 'Please log in to access the dashboard');
         return res.render('accounts/login', {
             title: 'Login'
         });

@@ -17,26 +17,25 @@ router.get('/login', (req, res) => {
 
 /**
  * Process login form submission
- * For this assignment, any form submission automatically logs the user in
  */
 router.post('/login', (req, res) => {
     const { username, password } = req.body;
 
     // Basic validation
     if (!username || !password) {
-        res.locals.errors.push('Username and password are required');
+        req.flash('error', 'Username and password are required');
         return res.render('accounts/login', {
             title: 'Login'
         });
     }
 
     // For this assignment, any valid form submission logs the user in
-    // In a real application, you would verify credentials against a database
     req.session.isLoggedIn = true;
     req.session.username = username;
     req.session.loginTime = new Date();
 
-    // Redirect to dashboard
+    // Flash success message and redirect
+    req.flash('success', `Welcome back, ${username}! You have successfully logged in.`);
     res.redirect('/accounts/dashboard');
 });
 
@@ -46,10 +45,8 @@ router.post('/login', (req, res) => {
 router.get('/dashboard', (req, res) => {
     // Check if user is logged in
     if (!req.session.isLoggedIn) {
-        res.locals.errors.push('Please log in to access the dashboard');
-        return res.render('accounts/login', {
-            title: 'Login'
-        });
+        req.flash('error', 'Please log in to access the dashboard');
+        return res.redirect('/accounts/login');
     }
 
     res.render('accounts/dashboard', {
@@ -63,19 +60,20 @@ router.get('/dashboard', (req, res) => {
  * Process logout request
  */
 router.post('/logout', (req, res) => {
+    const username = req.session.username;
+
     req.session.destroy((err) => {
         if (err) {
             console.error('Error destroying session:', err);
-            res.locals.errors.push('Logout failed. Please try again.');
-            return res.render('accounts/dashboard', {
-                title: 'Account Dashboard',
-                username: req.session.username,
-                loginTime: req.session.loginTime
-            });
+            req.flash('error', 'Logout failed. Please try again.');
+            return res.redirect('/accounts/dashboard');
         }
 
         // Clear the session cookie
         res.clearCookie('sessionId');
+
+        // Flash success message and redirect to home
+        req.flash('success', `Goodbye, ${username}! You have been successfully logged out.`);
         res.redirect('/');
     });
 });

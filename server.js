@@ -10,6 +10,7 @@ import dashboardRoutes from './src/routes/dashboard/index.js';
 import { setupDatabase, testConnection } from './src/models/setup.js';
 import db from './src/models/db.js';
 import accountRoutes from './src/routes/accounts/index.js';
+import flashMessages from './src/middleware/flash.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -59,6 +60,9 @@ app.use(session({
         maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
     }
 }));
+
+// Add flash message middleware (after session, before routes)
+app.use(flashMessages);
 
 /**
  * Routes
